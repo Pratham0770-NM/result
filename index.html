@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VTU Provisional Result</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f2f2f2;
+            color: #222;
+        }
+
+        /* ================= HEADER ================= */
+        .header {
+            width: 80%;
+            margin: 0 auto;
+            height: 130px;
+            background: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            position: relative;
+        }
+
+        .header-left {
+            font-size: 25px;
+            font-weight: bold;
+            line-height: 1.5;
+            width: 40%;
+        }
+
+        .logo {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: white;
+            padding: 4px;
+        }
+
+        .header-right {
+            width: 45%;
+            font-size: 23px;
+            font-weight: bold;
+            line-height: 1.5;
+        }
+
+        /* ================= TITLE ================= */
+        .title-box {
+            width: 75%;
+            margin: 12px auto;
+            background: #f4b393;
+            padding: 15px;
+            text-align: center;
+            font-size: 21px;
+            line-height: 1.3;
+        }
+
+        .title-box .english {
+            font-size: 19px;
+            font-weight: bold;
+        }
+
+        /* ================= RESULT LOGIN BOX ================= */
+        .login-box {
+            width: 36%;
+            min-width: 500px;
+            margin: 10px auto 22px;
+            background: white;
+            border: 1px solid #d5d5d5;
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .login-title {
+            background: #91dfa8;
+            padding: 13px;
+            text-align: center;
+            font-size: 17px;
+            font-weight: bold;
+            line-height: 1.5;
+        }
+
+        .login-form {
+            padding: 17px;
+        }
+
+        .input {
+            width: 100%;
+            height: 38px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-size: 15px;
+            margin-bottom: 15px;
+        }
+
+        .captcha-row {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .captcha-input {
+            width: 52%;
+        }
+
+        .captcha-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #captcha {
+            background: #eee;
+            width: 145px;
+            height: 60px;
+            object-fit: contain;
+            border: 1px solid #ddd;
+        }
+
+        .refresh {
+            border: none;
+            background: transparent;
+            font-size: 24px;
+            cursor: pointer;
+            color: #1680c4;
+        }
+
+        /* ================= BUTTONS ================= */
+        .buttons {
+            display: flex;
+            gap: 32px;
+        }
+
+        .btn {
+            width: 50%;
+            height: 38px;
+            border-radius: 4px;
+            font-size: 17px;
+            cursor: pointer;
+            border: 1px solid;
+        }
+
+        .submit {
+            background: #9ddd9f;
+            border-color: #55b65d;
+        }
+
+        .submit:hover {
+            background: #82d187;
+        }
+
+        .cancel {
+            background: #f38d8d;
+            border-color: #d95c5c;
+        }
+
+        .cancel:hover {
+            background: #ef7272;
+        }
+
+        /* ================= RESULT ================= */
+        #resultPage {
+            display: none;
+            width: 90%;
+            margin: 25px auto;
+        }
+
+        .result-heading {
+            text-align: center;
+            background: #91dfa8;
+            padding: 15px;
+            font-size: 22px;
+            font-weight: bold;
+            border-radius: 5px 5px 0 0;
+        }
+
+        .student-details {
+            background: white;
+            border: 1px solid #ccc;
+            padding: 15px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 17px;
+        }
+
+        .marksheet-container {
+            background: white;
+            padding: 20px;
+            border: 1px solid #ccc;
+            text-align: center;
+        }
+
+        .marksheet-container img {
+            width: 100%;
+            max-width: 1600px;
+            height: auto;
+            display: block;
+            margin: auto;
+        }
+
+        .back-button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 35px;
+            background: #9ddd9f;
+            border: 1px solid #55b65d;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        /* ================= FOOTER ================= */
+        .footer {
+            width: 80%;
+            margin: 0 auto;
+            background: #484e53;
+            color: white;
+            text-align: center;
+            padding: 18px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* ================= ERROR ================= */
+        .error {
+            color: red;
+            font-size: 14px;
+            margin-top: -8px;
+            margin-bottom: 10px;
+            display: none;
+        }
+
+        /* ================= MOBILE ================= */
+        @media screen and (max-width: 800px) {
+            .header {
+                width: 95%;
+                height: auto;
+                padding: 15px;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .header-left,
+            .header-right {
+                width: 100%;
+            }
+
+            .header-left {
+                font-size: 18px;
+            }
+
+            .header-right {
+                font-size: 18px;
+            }
+
+            .logo {
+                width: 80px;
+                height: 80px;
+            }
+
+            .title-box {
+                width: 95%;
+                font-size: 17px;
+            }
+
+            .login-box {
+                width: 95%;
+                min-width: 0;
+            }
+
+            .captcha-row {
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch;
+            }
+
+            .captcha-input {
+                width: 100%;
+            }
+
+            .captcha-container {
+                justify-content: center;
+            }
+
+            .buttons {
+                gap: 10px;
+            }
+
+            .student-details {
+                grid-template-columns: 1fr;
+            }
+
+            #resultPage {
+                width: 98%;
+            }
+
+            .footer {
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ================= HEADER ================= -->
+    <div class="header">
+        <div class="header-left">
+            ವಿಶ್ವೇಶ್ವರಯ್ಯ ತಾಂತ್ರಿಕ ವಿಶ್ವವಿದ್ಯಾಲಯ<br>
+            ಬೆಳಗಾವಿ.
+        </div>
+
+        <img
+            class="logo"
+            src="https://upload.wikimedia.org/wikipedia/en/8/8f/Visvesvaraya_Technological_University_logo.png"
+            alt="VTU Logo"
+        >
+
+        <div class="header-right">
+            VISVESVARAYA TECHNOLOGICAL UNIVERSITY<br>
+            BELAGAVI.
+        </div>
+    </div>
+
+    <!-- ================= MAIN TITLE ================= -->
+    <div class="title-box">
+        <div>
+            ವಿ.ತಾ.ವಿ. ಸಾಮಯಿಕ ಫಲಿತಾಂಶ
+        </div>
+        <div class="english">
+            VTU PROVISIONAL RESULT
+        </div>
+    </div>
+
+    <!-- ================= LOGIN ================= -->
+    <div class="login-box" id="loginBox">
+        <div class="login-title">
+            🌐 ಮೇ / ಜೂನ್-2026 ಪರೀಕ್ಷೆಯ ಫಲಿತಾಂಶ
+            <br>
+            May / June-2026 EXAMINATION RESULTS
+        </div>
+
+        <div class="login-form">
+            <!-- USN -->
+            <input
+                type="text"
+                id="usn"
+                class="input"
+                placeholder="Enter USN"
+            >
+
+            <!-- CAPTCHA -->
+            <div class="captcha-row">
+                <input
+                    type="text"
+                    id="captchaInput"
+                    class="input captcha-input"
+                    placeholder="Enter Captcha Code"
+                >
+
+                <div class="captcha-container">
+                    <canvas
+                        id="captcha"
+                        width="145"
+                        height="60">
+                    </canvas>
+
+                    <button
+                        class="refresh"
+                        onclick="generateCaptcha()">
+                        ↻
+                    </button>
+                </div>
+            </div>
+
+            <div
+                id="error"
+                class="error">
+                Invalid USN or Captcha!
+            </div>
+
+            <!-- BUTTONS -->
+            <div class="buttons">
+                <button
+                    class="btn submit"
+                    onclick="showResult()">
+                    ಸಲ್ಲಿಸಿ / Submit
+                </button>
+
+                <button
+                    class="btn cancel"
+                    onclick="clearForm()">
+                    ರದ್ದುಪಡಿಸಿ / Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= RESULT PAGE ================= -->
+    <div id="resultPage">
+        <div class="result-heading">
+            VTU PROVISIONAL RESULT
+        </div>
+
+        <div class="student-details">
+            <div>
+                <strong>University Seat Number:</strong>
+                <span id="displayUSN"></span>
+            </div>
+
+            <div>
+                <strong>Student Name:</strong>
+                PRATHAM N M
+            </div>
+        </div>
+
+        <div class="marksheet-container">
+            <img
+                src="https://raw.githubusercontent.com/Pratham0770-NM/marksheet-website/main/marksheet.png.png"
+                alt="Student Marksheet"
+            >
+        </div>
+
+        <button
+            class="back-button"
+            onclick="goBack()">
+            ← Back to Result Search
+        </button>
+    </div>
+
+    <!-- ================= FOOTER ================= -->
+    <div class="footer">
+        © 2026 Visvesvaraya Technological University, Belagavi, Karnataka, India.
+        <br>
+        © 2026 Designed & Developed for Educational Purpose.
+    </div>
+
+    <!-- ================= JAVASCRIPT ================= -->
+    <script>
+        let captchaText = "";
+
+        /* Generate CAPTCHA */
+        function generateCaptcha() {
+            const characters = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+            captchaText = "";
+
+            for (let i = 0; i < 5; i++) {
+                captchaText += characters.charAt(
+                    Math.floor(Math.random() * characters.length)
+                );
+            }
+
+            const canvas = document.getElementById("captcha");
+            const ctx = canvas.getContext("2d");
+
+            // Background
+            ctx.fillStyle = "#eeeeee";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Noise
+            for (let i = 0; i < 25; i++) {
+                ctx.beginPath();
+                ctx.moveTo(
+                    Math.random() * canvas.width,
+                    Math.random() * canvas.height
+                );
+                ctx.lineTo(
+                    Math.random() * canvas.width,
+                    Math.random() * canvas.height
+                );
+                ctx.strokeStyle = "#888";
+                ctx.stroke();
+            }
+
+            // CAPTCHA text
+            ctx.font = "bold 27px Arial";
+            ctx.fillStyle = "#555";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(
+                captchaText,
+                canvas.width / 2,
+                canvas.height / 2
+            );
+        }
+
+        /* Show Result */
+        function showResult() {
+            const usn = document.getElementById("usn").value.trim();
+            const enteredCaptcha = document.getElementById("captchaInput").value.trim().toUpperCase();
+            const error = document.getElementById("error");
+
+            // Check USN
+            if (usn === "") {
+                error.innerText = "Please enter your USN.";
+                error.style.display = "block";
+                return;
+            }
+
+            // Check CAPTCHA
+            if (enteredCaptcha !== captchaText) {
+                error.innerText = "Incorrect Captcha. Please try again.";
+                error.style.display = "block";
+                generateCaptcha();
+                document.getElementById("captchaInput").value = "";
+                return;
+            }
+
+            // Successful
+            error.style.display = "none";
+            document.getElementById("displayUSN").innerText = usn;
+            document.getElementById("loginBox").style.display = "none";
+            document.getElementById("resultPage").style.display = "block";
+            window.scrollTo(0, 0);
+        }
+
+        /* Cancel */
+        function clearForm() {
+            document.getElementById("usn").value = "";
+            document.getElementById("captchaInput").value = "";
+            document.getElementById("error").style.display = "none";
+            generateCaptcha();
+        }
+
+        /* Back */
+        function goBack() {
+            document.getElementById("resultPage").style.display = "none";
+            document.getElementById("loginBox").style.display = "block";
+            clearForm();
+            window.scrollTo(0, 0);
+        }
+
+        /* Start CAPTCHA */
+        generateCaptcha();
+    </script>
+
+</body>
+</html>
