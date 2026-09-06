@@ -1,50 +1,65 @@
-const express = require('express');
-const path = require('path');
+const express = require("express");
+const path = require("path");
 
 const app = express();
-const PORT = 3000;
 
-// ===============================
-// Middleware
-// ===============================
+
+// ==========================================
+// PORT
+// ==========================================
+
+const PORT = process.env.PORT || 3000;
+
+
+// ==========================================
+// MIDDLEWARE
+// ==========================================
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve files from frontend folder
-app.use(express.static(path.join(__dirname, 'frontend')));
+
+// ==========================================
+// STATIC FILES
+// ==========================================
+// index.html
+// marksheet.png
+// CSS / JS / images
+// are all inside the main project folder.
+
+app.use(express.static(__dirname));
 
 
-// ===============================
-// Student Data
-// ===============================
+// ==========================================
+// STUDENT DATA
+// ==========================================
 
 const studentData = {
 
-    '1RV23CS001': {
-        name: 'PRATHAM N M',
-        usn: '1RV23CS001',
-        marksheet: 'https://raw.githubusercontent.com/Pratham0770-NM/marksheet-website/main/marksheet.png.png'
+    "1RV23CS001": {
+        name: "PRATHAM N M",
+        usn: "1RV23CS001",
+        marksheet: "/marksheet.png"
     },
 
-    '1RV23CS002': {
-        name: 'RAHUL KUMAR',
-        usn: '1RV23CS002',
-        marksheet: 'https://raw.githubusercontent.com/Pratham0770-NM/marksheet-website/main/marksheet.png.png'
+    "1RV23CS002": {
+        name: "RAHUL KUMAR",
+        usn: "1RV23CS002",
+        marksheet: "/marksheet.png"
     },
 
-    '1RV23CS003': {
-        name: 'ANANYA SHARMA',
-        usn: '1RV23CS003',
-        marksheet: 'https://raw.githubusercontent.com/Pratham0770-NM/marksheet-website/main/marksheet.png.png'
+    "1RV23CS003": {
+        name: "ANANYA SHARMA",
+        usn: "1RV23CS003",
+        marksheet: "/marksheet.png"
     }
 
 };
 
 
-// ===============================
+// ==========================================
 // CAPTCHA
-// ===============================
+// ==========================================
 
 function generateCaptcha() {
 
@@ -55,78 +70,93 @@ function generateCaptcha() {
 
     for (let i = 0; i < 5; i++) {
 
-        captcha += characters.charAt(
-            Math.floor(
-                Math.random() * characters.length
-            )
+        const randomIndex = Math.floor(
+            Math.random() * characters.length
         );
+
+        captcha += characters[randomIndex];
 
     }
 
     return captcha;
 }
 
+
+// Current CAPTCHA
 let currentCaptcha = generateCaptcha();
 
 
-// ===============================
+// ==========================================
 // HOME PAGE
-// ===============================
+// ==========================================
 
-app.get('/', (req, res) => {
+app.get("/", (req, res) => {
 
     res.sendFile(
-        path.join(__dirname, 'frontend', 'index.html')
+        path.join(__dirname, "index.html")
     );
 
 });
 
 
-// ===============================
-// LONG 4TH SEMESTER URL
-// ===============================
+// ==========================================
+// RESULT PAGE
+// ==========================================
 
 app.get(
-    '/vtu-4thsemesterresults-may-june-2026',
+    "/vtu-4thsemesterresults-may-june-2026",
     (req, res) => {
 
         res.sendFile(
-            path.join(__dirname, 'frontend', 'index.html')
+            path.join(__dirname, "index.html")
         );
 
     }
 );
 
 
-// ===============================
-// GET CAPTCHA
-// ===============================
+// ==========================================
+// GET NEW CAPTCHA
+// ==========================================
 
-app.get('/api/captcha', (req, res) => {
+app.get("/api/captcha", (req, res) => {
 
     currentCaptcha = generateCaptcha();
 
     res.json({
 
-        captcha: currentCaptcha,
+        success: true,
 
-        message: 'New CAPTCHA generated'
+        captcha: currentCaptcha
 
     });
 
 });
 
 
-// ===============================
+// ==========================================
 // VERIFY USN + CAPTCHA
-// ===============================
+// ==========================================
 
-app.post('/api/verify', (req, res) => {
+app.post("/api/verify", (req, res) => {
 
-    const { usn, captcha } = req.body;
+    const usn = String(
+        req.body.usn || ""
+    )
+        .trim()
+        .toUpperCase();
 
 
-    // Check input
+    const captcha = String(
+        req.body.captcha || ""
+    )
+        .trim()
+        .toUpperCase();
+
+
+    // ------------------------------
+    // Check empty fields
+    // ------------------------------
 
     if (!usn || !captcha) {
 
@@ -134,37 +164,43 @@ app.post('/api/verify', (req, res) => {
 
             success: false,
 
-            message: 'USN and CAPTCHA are required'
+            message:
+                "Please enter USN and CAPTCHA."
 
         });
 
     }
 
 
+    // ------------------------------
     // Check CAPTCHA
+    // ------------------------------
 
-    if (
-        captcha.toUpperCase() !==
-        currentCaptcha
-    ) {
+    if (captcha !== currentCaptcha) {
+
+        // Generate a new CAPTCHA
+        currentCaptcha = generateCaptcha();
 
         return res.status(400).json({
 
             success: false,
 
-            message: 'Invalid CAPTCHA'
+            message:
+                "Invalid CAPTCHA.",
+
+            captcha:
+                currentCaptcha
 
         });
 
     }
 
 
-    // Check USN
+    // ------------------------------
+    // Find student
+    // ------------------------------
 
-    const student =
-        studentData[
-            usn.toUpperCase()
-        ];
+    const student = studentData[usn];
 
 
     if (!student) {
@@ -173,24 +209,30 @@ app.post('/api/verify', (req, res) => {
 
             success: false,
 
-            message: 'USN not found'
+            message:
+                "USN not found."
 
         });
 
     }
 
 
-    // Successful login
+    // ------------------------------
+    // Successful result
+    // ------------------------------
 
-    res.json({
+    return res.json({
 
         success: true,
 
+        message:
+            "Result found successfully.",
+
         data: {
 
-            usn: student.usn,
-
             name: student.name,
+
+            usn: student.usn,
 
             marksheet: student.marksheet
 
@@ -201,17 +243,20 @@ app.post('/api/verify', (req, res) => {
 });
 
 
-// ===============================
+// ==========================================
 // GET STUDENT DETAILS
-// ===============================
+// ==========================================
 
-app.get('/api/student/:usn', (req, res) => {
+app.get("/api/student/:usn", (req, res) => {
 
-    const usn =
-        req.params.usn.toUpperCase();
+    const usn = String(
+        req.params.usn || ""
+    )
+        .trim()
+        .toUpperCase();
 
-    const student =
-        studentData[usn];
+
+    const student = studentData[usn];
 
 
     if (!student) {
@@ -220,47 +265,100 @@ app.get('/api/student/:usn', (req, res) => {
 
             success: false,
 
-            message: 'Student not found'
+            message:
+                "Student not found."
 
         });
 
     }
 
 
-    res.json({
+    return res.json({
 
         success: true,
 
-        data: student
+        data: {
+
+            name: student.name,
+
+            usn: student.usn,
+
+            marksheet: student.marksheet
+
+        }
 
     });
 
 });
 
 
-// ===============================
+// ==========================================
+// 404 PAGE
+// ==========================================
+
+app.use((req, res) => {
+
+    res.status(404).send(`
+
+        <!DOCTYPE html>
+
+        <html>
+
+        <head>
+
+            <meta charset="UTF-8">
+
+            <meta
+                name="viewport"
+                content="width=device-width, initial-scale=1.0"
+            >
+
+            <title>Page Not Found</title>
+
+        </head>
+
+        <body style="
+            margin: 0;
+            padding: 50px 20px;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        ">
+
+            <h1>404</h1>
+
+            <p>
+                The requested page was not found.
+            </p>
+
+            <a href="/">
+                Go to Result Page
+            </a>
+
+        </body>
+
+        </html>
+
+    `);
+
+});
+
+
+// ==========================================
 // START SERVER
-// ===============================
+// ==========================================
 
-// 0.0.0.0 allows other devices
-// on the same Wi-Fi to access this server
-
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, "0.0.0.0", () => {
 
     console.log(
         `Server running on port ${PORT}`
     );
 
     console.log(
-        `PC: http://localhost:${PORT}`
+        `Local: http://localhost:${PORT}`
     );
 
     console.log(
         `Result: http://localhost:${PORT}/vtu-4thsemesterresults-may-june-2026`
-    );
-
-    console.log(
-        `Current CAPTCHA: ${currentCaptcha}`
     );
 
 });
